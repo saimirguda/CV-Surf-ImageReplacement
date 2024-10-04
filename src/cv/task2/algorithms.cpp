@@ -9,7 +9,7 @@
 //==============================================================================
 // calcIntegralImage(const cv::Mat& image, cv::Mat& integral_image)
 //------------------------------------------------------------------------------
-// Calculates the integral image from a given input image. 
+// Calculates the integral image from a given input image.
 //
 // Do **NOT** use cv::integralImage for this method.
 //
@@ -26,7 +26,7 @@
 // const cv::Mat& image: The input image. The data type is CV_8UC1 (i.e. uint8_t)
 // access the image via image.at<uint8_t>(x,y)
 //
-// cv::Mat& integral_image: output parameter to store integral image. The data 
+// cv::Mat& integral_image: output parameter to store integral image. The data
 //          type is CV_32SC1 (i.e. int32_t).
 //==============================================================================
 void algorithms::calcIntegralImage(const cv::Mat& image, cv::Mat& integral_image)
@@ -114,10 +114,9 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
     const int num_levels = 4;
     const float w_const = 0.912f;
 
-    // Helper function to calculate sum of intensities in a rectangle using the integral image
-    auto calcSum = [&](int xA, int yA, int xB, int yB, int xC, int yC, int xD, int yD) {
-        return integral_image.at<int>(yD, xD)+ integral_image.at<int>(yA, xA) -
-               integral_image.at<int>(yB, xB) - integral_image.at<int>(yC, xC) ;
+    auto calcSUM = [&](int xA, int yA, int xB, int yB, int xC, int yC, int xD, int yD) {
+        return integral_image.at<int>(yD + 1, xD + 1)+ integral_image.at<int>(yA, xA) -
+               integral_image.at<int>(yB, xB + 1) - integral_image.at<int>(yC + 1, xC) ;
     };
 
     // Iterate through octaves and levels starting from 1
@@ -150,7 +149,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     float D_x = x0 + (s - 1) , D_y = y0 +  (s + ((s - 1) / 2));
 
                     // Calculate the sum of the entire rectangle
-                    float total_sum = calcSum(static_cast<int>(A_x), static_cast<int>(A_y), static_cast<int>(B_x) + 1, static_cast<int>(B_y), static_cast<int>(C_x), static_cast<int>(C_y) + 1, static_cast<int>(D_x) + 1, static_cast<int>(D_y) + 1);
+                    float total_sum = calcSUM(static_cast<int>(A_x), static_cast<int>(A_y),
+                                              static_cast<int>(B_x), static_cast<int>(B_y),
+                                              static_cast<int>(C_x), static_cast<int>(C_y),
+                                              static_cast<int>(D_x), static_cast<int>(D_y));
 
                     // Calculate the coordinates of the inner rectangle for Iyy (red space)
                     float inner_A_x = x0 - (s - 1), inner_A_y = y0 -  ( (s-1) / 2);
@@ -159,7 +161,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     float inner_D_x = x0 + (s - 1), inner_D_y = y0 +  ( (s-1) / 2);
 
                     // Calculate the sum of the inner rectangle
-                    float inner_sum = calcSum(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y), static_cast<int>(inner_B_x) + 1, static_cast<int>(inner_B_y), static_cast<int>(inner_C_x), static_cast<int>(inner_C_y) + 1, static_cast<int>(inner_D_x) + 1, static_cast<int>(inner_D_y) + 1);
+                    float inner_sum = calcSUM(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y),
+                                              static_cast<int>(inner_B_x), static_cast<int>(inner_B_y),
+                                              static_cast<int>(inner_C_x), static_cast<int>(inner_C_y),
+                                              static_cast<int>(inner_D_x), static_cast<int>(inner_D_y));
 
                     // Calculate Iyy value
                     float Iyy_val = total_sum - 3 * inner_sum;
@@ -176,7 +181,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     D_x = x0 + (s + ((s - 1) / 2)) , D_y = y0 +  (s - 1) ;
 
                     // Calculate the sum of the entire rectangle
-                    total_sum = calcSum(static_cast<int>(A_x), static_cast<int>(A_y), static_cast<int>(B_x) + 1, static_cast<int>(B_y), static_cast<int>(C_x), static_cast<int>(C_y) + 1, static_cast<int>(D_x) + 1, static_cast<int>(D_y) + 1);
+                    total_sum = calcSUM(static_cast<int>(A_x), static_cast<int>(A_y),
+                                        static_cast<int>(B_x), static_cast<int>(B_y),
+                                        static_cast<int>(C_x), static_cast<int>(C_y),
+                                        static_cast<int>(D_x), static_cast<int>(D_y));
 
                     // Calculate the coordinates of the inner rectangle for Ixx (red space)
                     inner_A_x = x0 - ( (s-1) / 2), inner_A_y = y0 -  (s - 1);
@@ -185,7 +193,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     inner_D_x = x0 + ( (s-1) / 2), inner_D_y = y0 +  (s - 1);
 
                     // Calculate the sum of the inner rectangle
-                    inner_sum = calcSum(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y), static_cast<int>(inner_B_x) + 1, static_cast<int>(inner_B_y), static_cast<int>(inner_C_x), static_cast<int>(inner_C_y) + 1, static_cast<int>(inner_D_x) + 1, static_cast<int>(inner_D_y) + 1);
+                    inner_sum = calcSUM(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y),
+                                        static_cast<int>(inner_B_x), static_cast<int>(inner_B_y),
+                                        static_cast<int>(inner_C_x), static_cast<int>(inner_C_y),
+                                        static_cast<int>(inner_D_x), static_cast<int>(inner_D_y));
 
                     // Calculate Iyy value
                     float Ixx_val = total_sum - 3 * inner_sum;
@@ -195,14 +206,17 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     // Top point left
                     A_x = x0 + 1, A_y = y0 -  (s ) ;
                     // Top point right
-                    B_x = x0 + (s ), B_y = y0 -  (s ) ;
+                    B_x = x0 + (s ), B_y = y0 -  (s);
                     // Bottom point left
                     C_x = x0 + 1 , C_y = y0 -  1 ;
                     // Bottom point right
                     D_x = x0 + (s ) , D_y = y0 -  1 ;
 
                     // Calculate the sum of the positive square
-                    total_sum = calcSum(static_cast<int>(A_x), static_cast<int>(A_y), static_cast<int>(B_x) + 1, static_cast<int>(B_y), static_cast<int>(C_x), static_cast<int>(C_y) + 1, static_cast<int>(D_x) + 1, static_cast<int>(D_y) + 1);
+                    total_sum = calcSUM(static_cast<int>(A_x), static_cast<int>(A_y),
+                                        static_cast<int>(B_x), static_cast<int>(B_y),
+                                        static_cast<int>(C_x), static_cast<int>(C_y),
+                                        static_cast<int>(D_x), static_cast<int>(D_y));
 
                     // Top point left
                     A_x = x0 - (s ), A_y = y0 + 1 ;
@@ -214,7 +228,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     D_x = x0 - 1, D_y = y0 + (s ) ;
 
                     // Calculate the sum of the positive square
-                    total_sum += calcSum(static_cast<int>(A_x), static_cast<int>(A_y), static_cast<int>(B_x) + 1, static_cast<int>(B_y), static_cast<int>(C_x), static_cast<int>(C_y) + 1, static_cast<int>(D_x) + 1, static_cast<int>(D_y) + 1);
+                    total_sum += calcSUM(static_cast<int>(A_x), static_cast<int>(A_y),
+                                         static_cast<int>(B_x), static_cast<int>(B_y),
+                                         static_cast<int>(C_x), static_cast<int>(C_y),
+                                         static_cast<int>(D_x), static_cast<int>(D_y));
 
                     // Calculate the coordinates of the regative square for Ixy (red space)
                     // left top
@@ -227,7 +244,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     inner_D_x = x0 - 1, inner_D_y = y0 - 1;
 
                     // Calculate the sum of the negative square
-                    inner_sum = calcSum(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y), static_cast<int>(inner_B_x) + 1, static_cast<int>(inner_B_y), static_cast<int>(inner_C_x), static_cast<int>(inner_C_y) + 1, static_cast<int>(inner_D_x) + 1, static_cast<int>(inner_D_y) + 1);
+                    inner_sum = calcSUM(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y),
+                                        static_cast<int>(inner_B_x), static_cast<int>(inner_B_y),
+                                        static_cast<int>(inner_C_x), static_cast<int>(inner_C_y),
+                                        static_cast<int>(inner_D_x), static_cast<int>(inner_D_y));
 
                     // left top
                     inner_A_x = x0 + 1, inner_A_y = y0 + 1;
@@ -238,7 +258,10 @@ void algorithms::calcHessianResponses(const cv::Mat& image_gray,
                     // right bottom
                     inner_D_x = x0 + (s ), inner_D_y = y0 + (s );
 
-                    inner_sum += calcSum(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y), static_cast<int>(inner_B_x) + 1, static_cast<int>(inner_B_y), static_cast<int>(inner_C_x), static_cast<int>(inner_C_y) + 1, static_cast<int>(inner_D_x) + 1, static_cast<int>(inner_D_y) + 1);
+                    inner_sum += calcSUM(static_cast<int>(inner_A_x), static_cast<int>(inner_A_y),
+                                         static_cast<int>(inner_B_x), static_cast<int>(inner_B_y),
+                                         static_cast<int>(inner_C_x), static_cast<int>(inner_C_y),
+                                         static_cast<int>(inner_D_x), static_cast<int>(inner_D_y));
 
                     // Calculate Ixy value
                     float Ixy_val = total_sum - inner_sum;
@@ -267,22 +290,55 @@ bool isLocalMaxima (const std::vector<cv::Mat>& responses, int o, int l, int x, 
     if (currentValue <= threshold) {
         return false;
     }
-    for (int level = l - 1; level <= l + 1 ; level++)
-    {
-        cv::Mat currentResponse = responses[index + level - l];
-        for (int i = -delta; i <= delta; i+=delta)
-        {
-            for (int j = -delta; j <= delta; j+=delta)
-            {
-                if (((x + j) < 0) || ((y + i) < 0) || ((x + j)  >= currentResponse.cols) || ((y + i) >= currentResponse.rows))
-                {
-                    continue;
-                }
 
-                if (currentResponse.at<float>(y + i, x + j ) > currentValue)
-                {
-                    return false;
-                }
+    for (int i = -delta; i <= delta; i+=delta)
+    {
+        for (int j = -delta; j <= delta; j+=delta)
+        {
+            if (((x + j) < 0) || ((y + i) < 0) || ((x + j)  >= currentLevelResponse.cols) || ((y + i) >= currentLevelResponse.rows))
+            {
+                continue;
+            }
+
+            if (currentLevelResponse.at<float>(y + i, x + j ) > currentValue)
+            {
+                return false;
+            }
+        }
+    }
+
+    cv::Mat prevcurrentResponse = responses[index - 1];
+
+    for (int i = -delta; i <= delta; i+=delta)
+    {
+        for (int j = -delta; j <= delta; j+=delta)
+        {
+            if (((x + j) < 0) || ((y + i) < 0) || ((x + j)  >= prevcurrentResponse.cols) || ((y + i) >= prevcurrentResponse.rows))
+            {
+                continue;
+            }
+
+            if (prevcurrentResponse.at<float>(y + i, x + j ) > currentValue)
+            {
+                return false;
+            }
+        }
+    }
+
+    cv::Mat nextcurrentResponse = responses[index + 1];
+
+    for (int i = -delta; i <= delta; i+=delta)
+    {
+        for (int j = -delta; j <= delta; j+=delta)
+        {
+            if (((x + j) < 0) || ((y + i) < 0) || ((x + j)  >= nextcurrentResponse.cols) || ((y + i) >= nextcurrentResponse.rows))
+            {
+                continue;
+            }
+
+            if (nextcurrentResponse.at<float>(y + i, x + j ) > currentValue)
+            {
+                return false;
             }
         }
     }
@@ -352,17 +408,12 @@ void algorithms::calcNmsAndSurfFeatures(const cv::Mat &image_gray,
     // USE these values !!
     const int num_octaves = 4;
     const int num_levels = 4;
-    // Iterate over all octaves
     for (int o = 1; o <= num_octaves; ++o) {
         int delta = std::pow(2, o - 1);
-        // Iterate over levels 2 to 3
         for (int l = 2; l <= num_levels - 1; ++l) {
-            // Determine delta for the current octave
             int s = (std::pow(2, o) * l  + 1);
-            // Iterate over the rows and columns of the image_gray
             for (int y = 0; y < image_gray.rows; y += delta) {
                 for (int x = 0; x < image_gray.cols; x += delta) {
-                    // Check if the point is max
 
                     if (isLocalMaxima(responses, o, l, x, y, threshold, delta, num_levels)) {
 
@@ -461,7 +512,54 @@ void algorithms::calcSurfFeatures(const cv::Mat& image, const int border_size,
     calcNmsAndSurfFeatures(gray_image, integral_out, border_size, threshold, response_out, features, descriptors);
 }
 
+int calcIntegralSum(const cv::Mat& integral_image, int xA, int yA, int xB, int yB, int xC, int yC, int xD, int yD) {
+    return integral_image.at<int>(yD + 1, xD + 1) + integral_image.at<int>(yA, xA) -
+           integral_image.at<int>(yB, xB + 1) - integral_image.at<int>(yC + 1, xC);
+}
 
+float calcWeightedDerivativeComponent(const cv::Mat& integral_image, const cv::Mat& G_matrix, int x0, int y0, int t, int direction, int border_size) {
+    int A_x, A_y, B_x, B_y, C_x, C_y, D_x, D_y;
+
+    if (direction == 0) { // x-direction
+        A_x = x0 - t; A_y = y0 - t;
+        B_x = x0 - 1; B_y = y0 - t;
+        C_x = x0 - t; C_y = y0 + t;
+        D_x = x0 - 1; D_y = y0 + t;
+    } else { // y-direction
+        A_x = x0 - t; A_y = y0 - t;
+        B_x = x0 + t; B_y = y0 - t;
+        C_x = x0 - t; C_y = y0 - 1;
+        D_x = x0 + t; D_y = y0 - 1;
+    }
+
+    A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
+    B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
+    C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
+    D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
+
+    float negative_sum = calcIntegralSum(integral_image, A_x, A_y, B_x, B_y, C_x, C_y, D_x, D_y);
+
+    if (direction == 0) { // x-direction
+        A_x = x0 + 1; A_y = y0 - t;
+        B_x = x0 + t; B_y = y0 - t;
+        C_x = x0 + 1; C_y = y0 + t;
+        D_x = x0 + t; D_y = y0 + t;
+    } else { // y-direction
+        A_x = x0 - t; A_y = y0 + 1;
+        B_x = x0 + t; B_y = y0 + 1;
+        C_x = x0 - t; C_y = y0 + t;
+        D_x = x0 + t; D_y = y0 + t;
+    }
+
+    A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
+    B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
+    C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
+    D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
+
+    float positive_sum = calcIntegralSum(integral_image, A_x, A_y, B_x , B_y, C_x, C_y, D_x , D_y);
+
+    return positive_sum - negative_sum;
+}
 //==============================================================================
 // void calcWeightedDerivative(const cv::Mat& integral_image, const int border_size,
 //                             const KeyPoint& kp, int sigma, int s,
@@ -509,21 +607,14 @@ void algorithms::calcWeightedDerivative(const cv::Mat& integral_image, const int
                                         cv::Mat& weighted_derivative_x,
                                         cv::Mat& weighted_derivative_y)
 {
-    auto calcSum = [&](int xA, int yA, int xB, int yB, int xC, int yC, int xD, int yD) {
-        return integral_image.at<int>(yD, xD) + integral_image.at<int>(yA, xA) -
-               integral_image.at<int>(yB, xB) - integral_image.at<int>(yC, xC);
-    };
-
     int t = std::round(0.8 * s);
-
     std::vector<int> h(20), w(20);
     for (int i = -10; i < 10; ++i) {
         h[i + 10] = i;
         w[i + 10] = i;
     }
-    // Use these variables
 
-    cv::Mat gauss_vector = cv::getGaussianKernel(20, 3.3f * static_cast<float>(sigma), CV_32FC1);
+    cv::Mat gauss_vector = cv::getGaussianKernel(20, 3.3 * sigma, CV_32FC1);
     cv::Mat G_matrix = gauss_vector * gauss_vector.t();
 
     for (int y = 0; y < 20; ++y) {
@@ -531,59 +622,10 @@ void algorithms::calcWeightedDerivative(const cv::Mat& integral_image, const int
             int x0 = std::round((w[x] + 0.5) * sigma + kp.pt.x) + border_size + 1;
             int y0 = std::round((h[y] + 0.5) * sigma + kp.pt.y) + border_size + 1;
 
-            // Calculate the coordinates for the red section of the filter for Ix
-            int A_x = x0 - t, A_y = y0 - t;
-            int B_x = x0 - 1, B_y = y0 - t;
-            int C_x = x0 - t, C_y = y0 + t;
-            int D_x = x0 - 1, D_y = y0 + t;
-
-            A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
-            B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
-            C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
-            D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
-
-            float negative_sum = calcSum(A_x, A_y, B_x + 1, B_y, C_x, C_y + 1, D_x + 1, D_y + 1);
-
-            A_x = x0 + 1, A_y = y0 - t;
-            B_x = x0 + t, B_y = y0 - t;
-            C_x = x0 + 1, C_y = y0 + t;
-            D_x = x0 + t, D_y = y0 + t;
-
-            A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
-            B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
-            C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
-            D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
-
-            float positive_sum = calcSum(A_x, A_y, B_x + 1, B_y, C_x, C_y + 1, D_x + 1, D_y + 1);
-
-            float Ix = positive_sum - negative_sum;
+            float Ix = calcWeightedDerivativeComponent(integral_image, G_matrix, x0, y0, t, 0, border_size);
             weighted_derivative_x.at<float>(y, x) = Ix * G_matrix.at<float>(y, x);
 
-            A_x = x0 - t, A_y = y0 - t;
-            B_x = x0 + t, B_y = y0 - t;
-            C_x = x0 - t, C_y = y0 - 1;
-            D_x = x0 + t, D_y = y0 - 1;
-
-            A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
-            B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
-            C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
-            D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
-
-            negative_sum = calcSum(A_x, A_y, B_x + 1, B_y, C_x, C_y + 1, D_x + 1, D_y + 1);
-
-            A_x = x0 - t, A_y = y0 + 1;
-            B_x = x0 + t, B_y = y0 + 1;
-            C_x = x0 - t, C_y = y0 + t;
-            D_x = x0 + t, D_y = y0 + t;
-
-            A_x = std::max(A_x, 0); A_y = std::max(A_y, 0);
-            B_x = std::min(B_x, integral_image.cols - 1); B_y = std::max(B_y, 0);
-            C_x = std::max(C_x, 0); C_y = std::min(C_y, integral_image.rows - 1);
-            D_x = std::min(D_x, integral_image.cols - 1); D_y = std::min(D_y, integral_image.rows - 1);
-
-            positive_sum = calcSum(A_x, A_y, B_x + 1, B_y, C_x, C_y + 1, D_x + 1, D_y + 1);
-
-            float Iy = positive_sum - negative_sum;
+            float Iy = calcWeightedDerivativeComponent(integral_image, G_matrix, x0, y0, t, 1, border_size);
             weighted_derivative_y.at<float>(y, x) = Iy * G_matrix.at<float>(y, x);
         }
     }
@@ -625,30 +667,24 @@ void algorithms::calcWeightedDerivative(const cv::Mat& integral_image, const int
 // int s: calculation parameter s
 //==============================================================================
 void algorithms::addSurfDescriptor(const cv::Mat& integral_image, const int border_size,
-                                   const cv::KeyPoint& kp, cv::Mat& descriptors, int sigma, int s)
-{
-
-    cv::Mat weighted_derivative_x =  cv::Mat::zeros(20, 20, CV_32FC1);
+                       const cv::KeyPoint& kp, cv::Mat& descriptors, int sigma, int s) {
+    cv::Mat weighted_derivative_x = cv::Mat::zeros(20, 20, CV_32FC1);
     cv::Mat weighted_derivative_y = cv::Mat::zeros(20, 20, CV_32FC1);
 
     calcWeightedDerivative(integral_image, border_size, kp, sigma, s, weighted_derivative_x, weighted_derivative_y);
 
-    // Initialize the vectors to store derivatives
     std::vector<float> descriptor(64, 0.0f);
 
     for (int i = 0; i < 4; ++i) {
         for (int j = 0; j < 4; ++j) {
-            float Sx = 0.0f, Sy = 0.0f, Ax = 0.0f, Ay = 0.0f;
-            for (int u = 0; u < 5; ++u) {
-                for (int v = 0; v < 5; ++v) {
-                    int y = i*5 + u;
-                    int x = j*5 + v;
-                    Sx += weighted_derivative_x.at<float>(y, x);
-                    Sy += weighted_derivative_y.at<float>(y, x);
-                    Ax += std::abs(weighted_derivative_x.at<float>(y, x));
-                    Ay += std::abs(weighted_derivative_y.at<float>(y, x));
-                }
-            }
+            cv::Mat dxRegion = weighted_derivative_x(cv::Rect(j*5, i*5, 5, 5));
+            cv::Mat dyRegion = weighted_derivative_y(cv::Rect(j*5, i*5, 5, 5));
+
+            float Sx = cv::sum(dxRegion)[0];
+            float Sy = cv::sum(dyRegion)[0];
+            float Ax = cv::sum(cv::abs(dxRegion))[0];
+            float Ay = cv::sum(cv::abs(dyRegion))[0];
+
             int descriptor_idx = (i * 4 + j) * 4;
             descriptor[descriptor_idx] = Sx;
             descriptor[descriptor_idx + 1] = Sy;
@@ -656,9 +692,9 @@ void algorithms::addSurfDescriptor(const cv::Mat& integral_image, const int bord
             descriptor[descriptor_idx + 3] = Ay;
         }
     }
-    cv::Mat desc_mat = cv::Mat::zeros(descriptors.size(),  CV_32FC1);
-    cv::normalize(descriptor, desc_mat);
 
+    cv::Mat desc_mat(1, 64, CV_32FC1, descriptor.data());
+    cv::normalize(desc_mat, desc_mat, 1.0, 0.0, cv::NORM_L2);
     descriptors.push_back(desc_mat.clone());
 }
 
@@ -716,19 +752,17 @@ void algorithms::matchFeatures(const std::vector<cv::KeyPoint>& source_features,
 {
     const int k = 2;
 
-    // Step 1: Calculate matches using knnMatch
     std::vector<std::vector<cv::DMatch>> knn_matches;
 
-
-
     matcher.knnMatch(source_descriptors, target_descriptors, knn_matches, k);
-    // Step 2: Filter matches based on distance
     for (const auto& knn_match : knn_matches) {
 
+        if(knn_match.size() < 2) {
+            continue;
+        }
         const cv::DMatch& best_match = knn_match[0];
         const cv::DMatch& second_best_match = knn_match[1];
         if (best_match.distance <= match_distance_factor * second_best_match.distance) {
-            // Step 3: Insert remaining matches into output variables
             good_matches_source.push_back(source_features[best_match.queryIdx].pt);
             good_matches_target.push_back(target_features[best_match.trainIdx].pt);
         }
@@ -785,12 +819,11 @@ cv::Mat algorithms::calculateHomography(const std::vector<cv::Point2f>& good_mat
     cv::Mat best_homography;
 
     for (int iter = 0; iter < ransac_iterations; ++iter) {
-        // Randomly select 4 points
         std::vector<cv::Point2f> src_points(4);
         std::vector<cv::Point2f> dst_points(4);
         std::vector<int> selected_indices;
         while (selected_indices.size() < 4) {
-            int idx = uniform_dist(random_engine);
+            int idx = uniform_dist(random_engine) % good_matches_scene.size();
             if (std::find(selected_indices.begin(), selected_indices.end(), idx) == selected_indices.end()) {
                 selected_indices.push_back(idx);
                 src_points[selected_indices.size() - 1] = good_matches_scene[idx];
@@ -798,13 +831,11 @@ cv::Mat algorithms::calculateHomography(const std::vector<cv::Point2f>& good_mat
             }
         }
 
-        // Compute homography using the selected points
         cv::Mat homography = cv::findHomography(src_points, dst_points, 0);
         if (homography.empty()) {
             continue;
         }
 
-        // Check inliers
         std::vector<int> current_inliers;
         for (size_t i = 0; i < good_matches_scene.size(); ++i) {
             cv::Point2f projected_point = cv::Point2f(
@@ -820,7 +851,6 @@ cv::Mat algorithms::calculateHomography(const std::vector<cv::Point2f>& good_mat
             }
         }
 
-        // Update best homography if current one has more inliers
         if (current_inliers.size() > max_inliers) {
             max_inliers = current_inliers.size();
             inlier_indices = current_inliers;
@@ -829,9 +859,9 @@ cv::Mat algorithms::calculateHomography(const std::vector<cv::Point2f>& good_mat
     }
 
     if (!best_homography.empty()) {
-        best_homography.convertTo(best_homography, CV_32F);
+        best_homography.convertTo(best_homography, CV_32FC1);
     } else {
-        best_homography = cv::Mat::eye(3, 3, CV_32F);
+        best_homography = cv::Mat::eye(3, 3, CV_32FC1);
     }
     return best_homography;
 }
@@ -877,17 +907,13 @@ void algorithms::warpImage(const cv::Mat& img_object,
                            cv::Mat& warped_replacement_img, cv::Mat& H,
                            std::vector<cv::Point2f> &scene_corners)
 {
-    // Get the 4 corners of the img_object
     std::vector<cv::Point2f> object_corners(4);
     object_corners[0] = cv::Point2f(0, 0);
     object_corners[1] = cv::Point2f(static_cast<float>(img_object.cols - 1), 0);
     object_corners[2] = cv::Point2f(static_cast<float>(img_object.cols - 1) , static_cast<float>(img_object.rows - 1));
     object_corners[3] = cv::Point2f(0, static_cast<float>(img_object.rows - 1));
 
-    // Calculate the corresponding corners in the scene using cv::perspectiveTransform and the homography
     cv::perspectiveTransform(object_corners, scene_corners, H);
-
-    // Warp the replacement image using the homography
     cv::warpPerspective(img_replacement, warped_replacement_img, H, img_scene.size());
 }
 
@@ -950,10 +976,8 @@ void algorithms::createMask(const cv::Mat& img_scene, cv::Mat& mask,
     }
     cv::fillConvexPoly(mask, int_scene_corners, cv::Scalar(255));
 
-    // Initialize final image with the same size and type as the scene image
     final_image = img_scene.clone();
 
-    // Combine the warped replacement image and the scene image using the mask
     for (int y = 0; y < mask.rows; ++y) {
         for (int x = 0; x < mask.cols; ++x) {
             if (mask.at<uchar>(y, x) > 0) {
@@ -997,7 +1021,26 @@ void algorithms::createMask(const cv::Mat& img_scene, cv::Mat& mask,
 //==============================================================================
 void algorithms::calcHarrisMeasure(const cv::Mat& img, cv::Mat& R)
 {
-    float kappa = 0.05;
+    cv::Mat I_x, I_y;
+    cv::Sobel(img, I_x, CV_32FC1, 1, 0, 3);
+    cv::Sobel(img, I_y, CV_32FC1, 0, 1, 3);
+
+    cv::Mat G_xx = I_x.mul(I_x);
+    cv::Mat G_xy = I_x.mul(I_y);
+    cv::Mat G_yy = I_y.mul(I_y);
+
+    int kernelSize = 3;
+    float sigma = 0.3f * ((kernelSize - 1) * 0.5f - 1) + 0.8f;
+    cv::GaussianBlur(G_xx, G_xx, cv::Size(kernelSize, kernelSize), sigma);
+    cv::GaussianBlur(G_xy, G_xy, cv::Size(kernelSize, kernelSize), sigma);
+    cv::GaussianBlur(G_yy, G_yy, cv::Size(kernelSize, kernelSize), sigma);
+
+    float k = 0.05f;
+    cv::Mat det = G_xx.mul(G_yy) - G_xy.mul(G_xy);
+    cv::Mat trace = G_xx + G_yy;
+    R = det - k * trace.mul(trace);
+
+    cv::normalize(R, R, 0, 1, cv::NORM_MINMAX, CV_32FC1);
 }
 
 //==============================================================================
@@ -1053,6 +1096,7 @@ void algorithms::Fast(const cv::Mat& img, std::vector<cv::KeyPoint>& features,
                       const std::vector<cv::Point> &circle, const cv::Mat& R, int N, int thresh,
                       float harrisThreshold)
 {
+
 }
 
 
@@ -1081,7 +1125,24 @@ void algorithms::Fast(const cv::Mat& img, std::vector<cv::KeyPoint>& features,
 void algorithms::Brief(const cv::Mat& img, const std::vector<algorithms::BRIEF>& tests,
                        const std::vector<cv::KeyPoint>& features, cv::Mat& descriptors)
 {
-    const size_t byte_size = 8;
-    const int bytes = tests.size() / 8;
+    const size_t bits_per_byte = 8;
+    const int num_bytes = tests.size() / bits_per_byte;
+
+    descriptors = cv::Mat::zeros(features.size(), num_bytes, CV_8UC1);
+
+    for (size_t i = 0; i < features.size(); i++) {
+        const cv::Point2f& pt = features[i].pt;
+
+        for (size_t t = 0; t < tests.size(); t++) {
+            const algorithms::BRIEF& test = tests[t];
+
+            cv::Point2f pt_x = pt + test.x;
+            cv::Point2f pt_y = pt + test.y;
+
+            uchar bit = (img.at<uchar>(pt_y) < img.at<uchar>(pt_x)) ? 1 : 0;
+
+            descriptors.at<uchar>(i, t / bits_per_byte) |= (bit << (t % bits_per_byte));
+        }
+    }
 }
 
