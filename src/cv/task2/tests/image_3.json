@@ -1,0 +1,17 @@
+{
+  "testcases":
+  [
+    {
+      "img_object": "data/input/image_3/ad_3.jpg",
+      "img_scene": "data/input/image_3/timesquare_3.jpg",
+      "img_rep": "data/input/image_3/tulogo_3.jpg",
+      "folder" : "image_3",
+      "border": 400,
+      "threshold": 1000.0,
+      "match_distance_factor" : 0.67928,
+      "match_distance_factor_bonus" : 0.61780,
+      "ransac_inlier_threshold": 4,
+      "ransac_iterations": 150000
+    }
+  ]
+}

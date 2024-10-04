@@ -1,0 +1,17 @@
+{
+  "testcases":
+  [
+    {
+      "img_object": "data/input/image_5/eveningdawn.png",
+      "img_scene": "data/input/image_5/gallery.png",
+      "img_rep": "data/input/image_5/tugraz_logo.png",
+      "folder" : "image_5",
+      "border": 400,
+      "threshold": 500.0,
+      "match_distance_factor" : 0.85,
+      "match_distance_factor_bonus" : 0.6,
+      "ransac_inlier_threshold": 5,
+      "ransac_iterations": 100000
+    }
+  ]
+}
